@@ -2,6 +2,7 @@ package edu.illinois.library.cantaloupe.logging;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.util.StatusPrinter;
 import edu.illinois.library.cantaloupe.config.Configuration;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,7 @@ public final class LoggerUtil {
             // Reset the logger context.
             LoggerContext loggerContext =
                     (LoggerContext) LoggerFactory.getILoggerFactory();
-            JoranConfigurator jc = new JoranConfigurator();
-            jc.setContext(loggerContext);
+            ContextInitializer ci = new ContextInitializer(loggerContext);
             loggerContext.reset();
             // Copy logging-related configuration key/values into logger
             // context properties.
@@ -35,9 +35,8 @@ public final class LoggerUtil {
                 }
             }
             // Finally, reload the Logback configuration.
-            try (InputStream stream = LoggerUtil.class.getClassLoader().
-                    getResourceAsStream("logback.xml")) {
-                jc.doConfigure(stream);
+            try {
+                ci.autoConfig();
             } catch (Exception e) {
                 e.printStackTrace();
             }
