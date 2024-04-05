@@ -80,7 +80,22 @@ public class StandaloneEntry {
                     SystemUtils.exit(-1);
                 }
             }
-            getAppServer().start();
+            ApplicationServer server = getAppServer();
+            server.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run()
+                {
+                    System.out.println("Shutting down server");
+                    try {
+                        server.stop();
+                    } catch (Exception e) {
+                        System.out.println("Failed to shutdown server: " + e);
+                    }
+                }
+            });
+
         } catch (MissingConfigurationException e) {
             printUsage();
             SystemUtils.exit(-1);
