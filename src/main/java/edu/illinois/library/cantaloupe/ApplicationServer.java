@@ -19,6 +19,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.servlet.ListenerHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -52,6 +53,8 @@ public class ApplicationServer {
 
     static final int DEFAULT_HTTPS_PORT = 8183;
 
+    static final long DEFAULT_HTTP_STOP_TIMEOUT = 30000L;
+
     /**
      * Minimum number of threads in the pool. {@literal 8} is the default in
      * Jetty 9.4.
@@ -76,6 +79,7 @@ public class ApplicationServer {
     private String httpsKeyStorePath;
     private String httpsKeyStoreType;
     private int httpsPort                   = DEFAULT_HTTPS_PORT;
+    private long httpStopTimeout            = DEFAULT_HTTP_STOP_TIMEOUT;
     private boolean isStarted;
     private int minThreads                  = DEFAULT_MIN_THREADS;
     private int maxThreads                  = DEFAULT_MAX_THREADS;
@@ -108,6 +112,7 @@ public class ApplicationServer {
         setHTTPSKeyStoreType(
                 config.getString(Key.HTTPS_KEY_STORE_TYPE));
         setHTTPSPort(config.getInt(Key.HTTPS_PORT, DEFAULT_HTTPS_PORT));
+        setHttpStopTimeout(config.getLong(Key.HTTP_STOP_TIMEOUT, DEFAULT_HTTP_STOP_TIMEOUT));
         setMaxThreads(config.getInt(Key.HTTP_MAX_THREADS, DEFAULT_MAX_THREADS));
         setMinThreads(config.getInt(Key.HTTP_MIN_THREADS, DEFAULT_MIN_THREADS));
         setAcceptQueueLimit(config.getInt(Key.HTTP_ACCEPT_QUEUE_LIMIT,
@@ -128,12 +133,16 @@ public class ApplicationServer {
         context.getServletHandler().addListener(new ListenerHolder(ApplicationContextListener.class));
         context.getServletHandler().addListener(new ListenerHolder(IIOProviderContextListener.class));
 
+        StatisticsHandler statisticsHandler = new StatisticsHandler();
+        statisticsHandler.setHandler(context);
+
         QueuedThreadPool pool = new QueuedThreadPool(
                 getMaxThreads(), getMinThreads());
 
         server = new Server(pool);
+        server.setStopTimeout(getHttpStopTimeout());
         context.setServer(server);
-        server.setHandler(context);
+        server.setHandler(statisticsHandler);
 
         // This is technically "NCSA Combined" format.
         RequestLog log = new CustomRequestLog(
@@ -176,6 +185,10 @@ public class ApplicationServer {
 
     public int getHTTPSPort() {
         return httpsPort;
+    }
+
+    public long getHttpStopTimeout() {
+        return httpStopTimeout;
     }
 
     public int getMaxThreads() {
@@ -244,6 +257,10 @@ public class ApplicationServer {
 
     public void setHTTPSPort(int port) {
         this.httpsPort = port;
+    }
+
+    public void setHttpStopTimeout(long httpStopTimeout) {
+        this.httpStopTimeout = httpStopTimeout;
     }
 
     public void setMaxThreads(int maxThreads) {

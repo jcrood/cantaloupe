@@ -100,6 +100,7 @@ public enum Key {
     HTTP_MAX_THREADS("http.max_threads"),
     HTTP_MIN_THREADS("http.min_threads"),
     HTTP_PORT("http.port"),
+    HTTP_STOP_TIMEOUT("http.stop_timeout"),
     HTTPSOURCE_ALLOW_INSECURE("HttpSource.allow_insecure"),
     HTTPSOURCE_BASIC_AUTH_SECRET("HttpSource.BasicLookupStrategy.auth.basic.secret"),
     HTTPSOURCE_BASIC_AUTH_USERNAME("HttpSource.BasicLookupStrategy.auth.basic.username"),
