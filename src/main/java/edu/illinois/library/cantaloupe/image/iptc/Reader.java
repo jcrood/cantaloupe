@@ -97,8 +97,12 @@ public final class Reader implements AutoCloseable {
                 dataLength = buf.getInt();
             }
             byte[] data = new byte[dataLength];
-            inputStream.readFully(data);
-            dataSets.add(new DataSet(tag, data));
+            int bytesRead = inputStream.read(data);
+            if (bytesRead == dataLength) {
+                dataSets.add(new DataSet(tag, data));
+            } else {
+                LOGGER.debug("readNextDataSet(): read {} bytes but expected {}, skipping tag '{}'", bytesRead, dataLength, tag);
+            }
         }
         readNextDataSet();
     }
