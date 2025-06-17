@@ -74,6 +74,7 @@ final class Size {
 
         // Decode the path component.
         uriSize = uriSize.replace("%5E", "^");
+        uriSize = uriSize.replace("%21", "!");
 
         if (uriSize.startsWith("^")) {
             size.setUpscalingAllowed(true);
