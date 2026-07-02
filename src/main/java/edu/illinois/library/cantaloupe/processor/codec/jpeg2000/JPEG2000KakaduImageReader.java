@@ -432,6 +432,7 @@ public final class JPEG2000KakaduImageReader implements AutoCloseable {
         try {
             if (sourceFile != null) {
                 familySrc.Open(sourceFile.toString());
+                LOGGER.debug("Opened file: {}", sourceFile);
             } else {
                 compSrc = new KduImageInputStreamSource(inputStream);
                 familySrc.Open(compSrc);
